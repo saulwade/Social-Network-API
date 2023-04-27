@@ -1,16 +1,25 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 const cors = require('cors');
-
-dotenv.config();
+require('dotenv').config();
 
 const app = express();
-const apiRoutes = require('./apiRoutes');
+const PORT = process.env.PORT || 3001;
 
+// Middleware setup
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
+// Import routes
+const userRoutes = require('./routes/userRoutes');
+const thoughtRoutes = require('./routes/thoughtRoutes');
+
+// Use routes with the Express app
+app.use('/api/users', userRoutes);
+app.use('/api/thoughts', thoughtRoutes);
+
+// Connect to the MongoDB database
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -19,12 +28,10 @@ mongoose.connect(process.env.MONGODB_URI, {
 });
 
 mongoose.connection.on('connected', () => {
-  console.log('Connected to MongoDB');
+  console.log('Mongoose is connected');
 });
 
-app.use('/api', apiRoutes);
-
-const PORT = process.env.PORT || 3001;
+// Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`App running on port ${PORT}!`);
 });
